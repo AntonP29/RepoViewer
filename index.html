@@ -113,7 +113,7 @@
             color: #888;
         }
 
-        nav a[href="https://github.com/AntonP29"] svg {
+        nav a[href="https:github.com/AntonP29"] svg {
             position: relative;
             top: 6px;
         }
@@ -203,7 +203,7 @@
             appearance: none;
             -webkit-appearance: none;
             -moz-appearance: none;
-            background-image: url('data:image/svg+xml;utf8,<svg fill="white" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>');
+            background-image: url('data:image/svg+xml;utf8,<svg fill="white" height="24" viewBox="0 0 24 24" width="24" xmlns="http:www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>');
             background-repeat: no-repeat;
             background-position: right 0.5rem center;
         }
@@ -464,7 +464,6 @@
     </div>
 
     <script>
-        // Define Universal format in JavaScript
         class UniversalApp {
             constructor(data) {
                 this.Name = data.name || data.Name || '';
@@ -492,17 +491,14 @@
             }
         }
 
-        // Converter functions
         function convertToUniversal(data) {
             if (data instanceof Universal) return data;
 
             let universal = new Universal({});
 
             if (data.name || data.Name) {
-                // Universal format
                 universal = new Universal(data);
             } else if (data.META) {
-                // Scarlet format
                 universal.Name = data.META.repoName;
                 universal.IconURL = data.META.repoIcon;
                 universal.Apps = data.Tweaked.map(app => new UniversalApp({
@@ -515,7 +511,6 @@
                     BundleID: app.bundleID
                 }));
             } else if (data.apps && data.identifier && !data.subtitle) {
-                // ESign format
                 universal.Name = data.name;
                 universal.Identifier = data.identifier;
                 universal.Apps = data.apps.map(app => new UniversalApp({
@@ -529,7 +524,6 @@
                     Size: app.size
                 }));
             } else if (data.appRepositories) {
-                // GBox format
                 universal.Name = data.sourceName;
                 universal.IconURL = data.sourceImage;
                 universal.Description = data.sourceDescription;
@@ -542,7 +536,6 @@
                     Date: app.versionDate
                 }));
             } else if (data.apps && data.identifier && !data.iconURL) {
-                // Feather format
                 universal.Name = data.name;
                 universal.Identifier = data.identifier;
                 universal.Apps = data.apps.map(app => new UniversalApp({
@@ -556,7 +549,6 @@
                     Size: app.size
                 }));
             } else if (data.apps && data.identifier && data.subtitle) {
-                // AltStore format
                 const bundleIdIdxs = {};
                 data.apps.forEach((app, idx) => {
                     bundleIdIdxs[app.bundleIdentifier] = bundleIdIdxs[app.bundleIdentifier] || [];
@@ -601,7 +593,6 @@
             return universal;
         }
 
-        // Populate the app grid with apps
         function populateAppGrid(apps) {
             const appGrid = document.getElementById('app-grid');
             appGrid.innerHTML = '';
@@ -639,7 +630,6 @@
             document.getElementById('apps-section').style.display = 'block';
         }
 
-        // Search apps functionality with debouncing
         let searchTimeout;
         function searchApps() {
             clearTimeout(searchTimeout);
@@ -653,7 +643,6 @@
             }, 100);
         }
 
-        // Load repo from input with loading bar and italicized message
         async function loadRepo() {
             const input = document.querySelector('.repo-input textarea').value.trim();
             let repoData;
@@ -662,7 +651,6 @@
 
             try {
                 if (input.startsWith('http')) {
-                    // Handle URL
                     const proxyUrl = 'https://api.allorigins.win/raw?url=';
                     const response = await fetch(proxyUrl + encodeURIComponent(input), {
                         headers: {
@@ -672,7 +660,6 @@
                     if (!response.ok) throw new Error('Failed to fetch repo: ' + response.statusText);
                     repoData = await response.json();
                 } else if (isBase64(input)) {
-                    // Handle base64-encoded URL
                     const decoded = decodeBase64Repo(input);
                     if (decoded) {
                         const proxyUrl = 'https://api.allorigins.win/raw?url=';
@@ -685,15 +672,12 @@
                         repoData = await response.json();
                     }
                 } else {
-                    // Handle raw JSON
                     repoData = JSON.parse(input);
                 }
 
-                // Convert to Universal format
                 const universalRepo = convertToUniversal(repoData);
                 populateAppGrid(universalRepo.Apps);
 
-                // Add italicized message under the Load Repo button
                 const repoInputDiv = document.querySelector('.repo-input');
                 let reloadMessage = document.getElementById('reload-message');
                 if (!reloadMessage) {
@@ -712,14 +696,11 @@
             }
         }
 
-        // Improved base64 detection
         function isBase64(str) {
             if (str.length <= 100 || str.startsWith('{')) return false;
-            // Check if the string contains only valid base64 characters
             return /^[A-Za-z0-9+/=]+$/.test(str.replace(/\s/g, ''));
         }
 
-        // Decode base64 encoded repo URLs
         function decodeBase64Repo(encoded) {
             try {
                 encoded = encoded.trim().replace(/\s+/g, '');
@@ -738,7 +719,6 @@
             }
         }
 
-        // Copy selected common repo URL
         function copyRepo() {
             const select = document.getElementById('common-repos');
             const url = select.value;
@@ -753,7 +733,6 @@
             }
         }
 
-        // Initial setup
         document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('apps-section').style.display = 'none';
             document.getElementById('loading-bar').style.display = 'none';

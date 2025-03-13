@@ -651,9 +651,14 @@
         }
 
         function addLoadMoreButton(appGrid) {
+            const existingButton = document.querySelector('.load-more-btn');
+            if (existingButton) {
+                existingButton.remove();
+            }
+
             const loadMoreBtn = document.createElement('button');
             loadMoreBtn.textContent = 'Load More';
-            loadMoreBtn.className = 'download-btn';
+            loadMoreBtn.className = 'download-btn load-more-btn';
             loadMoreBtn.style.display = 'block';
             loadMoreBtn.style.margin = '1rem auto';
             loadMoreBtn.onclick = () => {
@@ -675,6 +680,11 @@
                 const searchInput = document.getElementById('search-input').value.toLowerCase();
                 const appGrid = document.getElementById('app-grid');
                 appGrid.innerHTML = '';
+
+                const existingButton = document.querySelector('.load-more-btn');
+                if (existingButton) {
+                    existingButton.remove();
+                }
 
                 const filteredApps = allApps.filter(app => app.Name.toLowerCase().includes(searchInput));
                 

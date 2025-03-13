@@ -709,7 +709,7 @@
 
             try {
                 if (input.startsWith('http')) {
-                    const proxyUrl = 'https://api.allorigins.win/raw?url=';
+                    const proxyUrl = 'https://repo-proxy.antonp29.workers.dev/?url=';
                     const response = await fetch(proxyUrl + encodeURIComponent(input), {
                         headers: {
                             'Origin': window.location.origin
@@ -720,7 +720,7 @@
                 } else if (isBase64(input)) {
                     const decoded = decodeBase64Repo(input);
                     if (decoded) {
-                        const proxyUrl = 'https://api.allorigins.win/raw?url=';
+                        const proxyUrl = 'https://repo-proxy.antonp29.workers.dev/?url=';
                         const response = await fetch(proxyUrl + encodeURIComponent(decoded), {
                             headers: {
                                 'Origin': window.location.origin

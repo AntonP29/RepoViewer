@@ -593,14 +593,36 @@
             return universal;
         }
 
+        function isMobile() {
+            return window.innerWidth <= 768;
+        }
+
+        let loadedApps = [];
+        let allApps = [];
+        const APPS_PER_PAGE = isMobile() ? 10 : 20;
+
         function populateAppGrid(apps) {
+            allApps = apps;
+            loadedApps = apps.slice(0, APPS_PER_PAGE);
             const appGrid = document.getElementById('app-grid');
             appGrid.innerHTML = '';
 
-            const fragment = document.createDocumentFragment();
-            const useAnimation = apps.length <= 25;
+            renderApps(loadedApps);
 
-            apps.forEach((app, index) => {
+            if (allApps.length > loadedApps.length) {
+                addLoadMoreButton(appGrid);
+            }
+
+            document.getElementById('loading-bar').style.display = 'none';
+            document.getElementById('apps-section').style.display = 'block';
+        }
+
+        function renderApps(appsToRender) {
+            const appGrid = document.getElementById('app-grid');
+            const fragment = document.createDocumentFragment();
+            const useAnimation = appsToRender.length <= 25;
+
+            appsToRender.forEach((app, index) => {
                 const appCard = document.createElement('div');
                 appCard.classList.add('app-card');
                 appCard.dataset.name = app.Name.toLowerCase();
@@ -626,8 +648,24 @@
             });
 
             appGrid.appendChild(fragment);
-            document.getElementById('loading-bar').style.display = 'none';
-            document.getElementById('apps-section').style.display = 'block';
+        }
+
+        function addLoadMoreButton(appGrid) {
+            const loadMoreBtn = document.createElement('button');
+            loadMoreBtn.textContent = 'Load More';
+            loadMoreBtn.className = 'download-btn';
+            loadMoreBtn.style.display = 'block';
+            loadMoreBtn.style.margin = '1rem auto';
+            loadMoreBtn.onclick = () => {
+                const nextApps = allApps.slice(loadedApps.length, loadedApps.length + APPS_PER_PAGE);
+                loadedApps = loadedApps.concat(nextApps);
+                renderApps(nextApps);
+
+                if (loadedApps.length >= allApps.length) {
+                    loadMoreBtn.remove();
+                }
+            };
+            appGrid.after(loadMoreBtn);
         }
 
         let searchTimeout;
@@ -635,11 +673,20 @@
             clearTimeout(searchTimeout);
             searchTimeout = setTimeout(() => {
                 const searchInput = document.getElementById('search-input').value.toLowerCase();
-                const appCards = document.getElementsByClassName('app-card');
-                Array.from(appCards).forEach(card => {
-                    const appName = card.dataset.name;
-                    card.style.display = appName.includes(searchInput) ? '' : 'none';
-                });
+                const appGrid = document.getElementById('app-grid');
+                appGrid.innerHTML = '';
+
+                const filteredApps = allApps.filter(app => app.Name.toLowerCase().includes(searchInput));
+                
+                if (searchInput === '') {
+                    loadedApps = allApps.slice(0, APPS_PER_PAGE);
+                    renderApps(loadedApps);
+                    if (allApps.length > loadedApps.length) {
+                        addLoadMoreButton(appGrid);
+                    }
+                } else {
+                    renderApps(filteredApps);
+                }
             }, 100);
         }
 
@@ -738,5 +785,5 @@
             document.getElementById('loading-bar').style.display = 'none';
         });
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'91f7587c59d3bd52',t:'MTc0MTgyNTAxOC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</body>
 </html>

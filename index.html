@@ -1,1 +1,763 @@
-index.html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AntonP29 iPA RepoViewer</title>
+    <style>
+        :root {
+            --bg-dark: #121212;
+            --text-light: #ffffff;
+            --accent-color: #4a4a4a;
+            --acrylic-opacity: rgba(0, 0, 0, 0.3);
+            --border-grey: #4a4848;
+            --green-acrylic: rgba(50, 205, 50, 0.3);
+            --green-acrylic-hover: rgba(50, 205, 50, 0.5);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: auto;
+        }
+
+        body {
+            font-family: 'Proxima Nova', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            background: url('https://raw.githubusercontent.com/AntonP29/RepoViewer/refs/heads/main/background/RepoViewerBackground.jpg') no-repeat center center fixed;
+            background-size: cover;
+            color: var(--text-light);
+            line-height: 1.6;
+            margin: 0;
+            overflow-x: hidden;
+            overflow-y: auto;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem 0;
+            position: relative;
+            min-height: 100vh;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: floatIn 0.5s ease-out forwards;
+        }
+
+        .acrylic {
+            background: var(--acrylic-opacity);
+            border-radius: 20px;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+            padding: 1rem;
+            position: relative;
+            overflow: hidden;
+            border: 2px solid transparent;
+            transition: border 0.3s ease;
+        }
+
+        .acrylic::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: inherit;
+            backdrop-filter: blur(20px);
+            filter: blur(4px);
+            z-index: -1;
+        }
+
+        .acrylic:hover {
+            border: 2px solid var(--border-grey);
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 2rem;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: floatIn 0.5s ease-out forwards;
+            margin-bottom: 4rem;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        nav {
+            position: relative;
+            top: -2.75px;
+        }
+
+        nav a {
+            color: var(--text-light);
+            text-decoration: none;
+            margin-left: 1rem;
+            transition: color 0.3s ease;
+            animation: floatInText 0.5s ease-out 0.5s forwards;
+            opacity: 0;
+            font-weight: bold;
+            display: inline-flex;
+            align-items: center;
+        }
+
+        nav a:hover {
+            color: #888;
+        }
+
+        nav a[href="https://github.com/AntonP29"] svg {
+            position: relative;
+            top: 6px;
+        }
+
+        .hero {
+            text-align: center;
+            padding: 2rem 0;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: floatIn 0.5s ease-out forwards;
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            font-weight: bold;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.4);
+            animation: floatInText 0.5s ease-out 0.5s forwards;
+            opacity: 0;
+        }
+
+        .hero p {
+            font-size: 1.1rem;
+            color: #aaa;
+            margin-bottom: 1rem;
+            animation: floatInText 0.5s ease-out 0.5s forwards;
+            opacity: 0;
+        }
+
+        .repo-input {
+            margin-bottom: 0.5rem;
+        }
+
+        .repo-input textarea {
+            width: 60%;
+            height: 60px;
+            padding: 0.8rem;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            border-radius: 10px;
+            color: var(--text-light);
+            resize: vertical;
+            font-family: inherit;
+            margin: 0 auto;
+            display: block;
+        }
+
+        .repo-input textarea::placeholder {
+            color: #aaa;
+            font-weight: bold;
+        }
+
+        .repo-input button {
+            padding: 0.8rem 1.5rem;
+            color: var(--text-light);
+            background: var(--green-acrylic);
+            backdrop-filter: blur(20px);
+            border-radius: 15px;
+            border: 2px solid transparent;
+            transition: background-color 0.3s ease, border 0.3s ease;
+            cursor: pointer;
+            margin-top: 1rem;
+        }
+
+        .repo-input button:hover {
+            background: var(--green-acrylic-hover);
+            border: 2px solid var(--border-grey);
+        }
+
+        .common-repos {
+            margin-top: 1rem;
+            text-align: center;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        .common-repos select {
+            width: 500px;
+            padding: 0.5rem 2rem 0.5rem 0.5rem;
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-light);
+            border: none;
+            border-radius: 5px;
+            margin-right: 0.5rem;
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            background-image: url('data:image/svg+xml;utf8,<svg fill="white" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>');
+            background-repeat: no-repeat;
+            background-position: right 0.5rem center;
+        }
+
+        .common-repos select option {
+            background: #000;
+            color: var(--text-light);
+        }
+
+        .common-repos button {
+            padding: 0.5rem 1rem;
+            background: var(--green-acrylic);
+            color: var(--text-light);
+            border: none;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            margin-top: 0.5rem;
+        }
+
+        .common-repos button:hover {
+            background: var(--green-acrylic-hover);
+        }
+
+        .loading-bar {
+            width: 60%;
+            height: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+            overflow: hidden;
+            margin: 1rem auto;
+            display: none;
+        }
+
+        .loading-bar .progress {
+            height: 100%;
+            background: var(--green-acrylic);
+            width: 0;
+            animation: loading 2s linear infinite;
+            border-radius: 5px;
+        }
+
+        @keyframes loading {
+            0% { width: 0; }
+            100% { width: 100%; }
+        }
+
+        .search-bar {
+            margin: 1rem 0;
+            text-align: center;
+        }
+
+        .search-bar input {
+            width: 60%;
+            padding: 0.8rem;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            border-radius: 10px;
+            color: var(--text-light);
+            font-family: inherit;
+        }
+
+        .search-bar input::placeholder {
+            color: #aaa;
+            font-weight: bold;
+        }
+
+        .apps-section {
+            margin-top: 4rem;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: floatIn 0.5s ease-out forwards;
+        }
+
+        .apps-section h2 {
+            text-align: center;
+            margin-bottom: 2rem;
+            font-weight: bold;
+            animation: floatInText 0.5s ease-out 0.5s forwards;
+            opacity: 0;
+        }
+
+        .app-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1rem;
+        }
+
+        .app-card {
+            border-radius: 20px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+            background: var(--acrylic-opacity);
+            opacity: 0;
+            position: relative;
+            border: 2px solid transparent;
+            transition: border 0.3s ease;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .app-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: inherit;
+            backdrop-filter: blur(20px);
+            filter: blur(4px);
+            z-index: -1;
+        }
+
+        .app-card:hover {
+            border: 2px solid var(--border-grey);
+        }
+
+        .app-card.visible {
+            opacity: 1;
+        }
+
+        .app-card.animate {
+            animation: floatIn 0.3s ease-out forwards;
+        }
+
+        .app-card img {
+            width: 64px;
+            height: 64px;
+            border-radius: 10px;
+            margin-bottom: 0.5rem;
+        }
+
+        .app-card h3 {
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+            animation: floatInText 0.3s ease-out 0.5s forwards;
+            opacity: 0;
+        }
+
+        .app-card p {
+            animation: floatInText 0.3s ease-out 0.5s forwards;
+            opacity: 0;
+            margin-bottom: 0.5rem;
+        }
+
+        .app-card .bundle-id,
+        .app-card .version {
+            font-size: 0.9rem;
+            color: #aaa;
+            margin-bottom: 0.5rem;
+        }
+
+        .download-btn {
+            display: inline-block;
+            padding: 0.8rem 1.5rem;
+            color: var(--text-light);
+            text-decoration: none;
+            background: var(--green-acrylic);
+            backdrop-filter: blur(20px);
+            border-radius: 15px;
+            border: 2px solid transparent;
+            transition: background-color 0.3s ease, border 0.3s ease;
+            text-align: center;
+            margin-top: auto;
+        }
+
+        .download-btn:hover {
+            background: var(--green-acrylic-hover);
+            border: 2px solid var(--border-grey);
+        }
+
+        footer {
+            text-align: center;
+            padding: 2rem 0;
+            margin-top: 2rem;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: floatIn 0.5s ease-out forwards;
+        }
+
+        footer p {
+            animation: floatInText 0.5s ease-out 0.5s forwards;
+            opacity: 0;
+        }
+
+        @keyframes floatIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes floatInText {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2rem;
+            }
+
+            .app-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .common-repos select {
+                width: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="acrylic">
+            <div class="logo">AP29</div>
+            <nav>
+                <a href="https://github.com/AntonP29" target="_blank">
+                    <svg width="24" height="24" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0016 8c0-4.42-3.58-8-8-8z" fill="currentColor"/>
+                    </svg>
+                </a>
+                <a href="https://antonp29.vercel.app/">Portfolio</a>
+            </nav>
+        </header>
+
+        <section class="hero acrylic">
+            <h1>AntonP29 iPA RepoViewer</h1>
+            <p>iPA Repo Viewer for iOS by AntonP29</p>
+            <div class="repo-input">
+                <textarea placeholder="Paste repo JSON URL or text here..."></textarea>
+                <button onclick="loadRepo()">Load Repo</button>
+            </div>
+            <div class="common-repos">
+                <select id="common-repos">
+                    <option value="">Select a Common Repo</option>
+                    <option value="https://raw.githubusercontent.com/AntonP29/AntonP29-Repo/refs/heads/main/repo.json">Repo 1 - https://raw.githubusercontent.com/AntonP29/AntonP29-Repo/refs/heads/main/repo.json</option>
+                    <option value="https://repo.ethsign.fyi/">Repo 2 - https://repo.ethsign.fyi/</option>
+                    <option value="https://repository.apptesters.org">Repo 3 - https://repository.apptesters.org</option>
+                </select>
+                <button onclick="copyRepo()">Copy</button>
+                <div class="loading-bar" id="loading-bar">
+                    <div class="progress"></div>
+                </div>
+            </div>
+        </section>
+
+        <section class="apps-section acrylic" id="apps-section">
+            <h2>Available Apps</h2>
+            <div class="search-bar">
+                <input type="text" id="search-input" placeholder="Search apps..." onkeyup="searchApps()">
+            </div>
+            <div class="app-grid" id="app-grid"></div>
+        </section>
+
+        <footer class="acrylic">
+            <p>© 2025 AntonP29. All Rights Reserved.</p>
+        </footer>
+    </div>
+
+    <script>
+        // Define Universal format in JavaScript
+        class UniversalApp {
+            constructor(data) {
+                this.Name = data.name || data.Name || '';
+                this.DeveloperName = data.developerName || data.DeveloperName || '';
+                this.BundleID = data.bundleID || data.BundleID || data.bundleIdentifier || '';
+                this.Caption = data.caption || data.Caption || data.subtitle || '';
+                this.Description = data.description || data.Description || data.localizedDescription || '';
+                this.DownloadURL = data.downloadURL || data.DownloadURL || data.down || data.appPackage || '';
+                this.IconURL = data.iconURL || data.IconURL || data.icon || data.appImage || '';
+                this.Version = data.version || data.Version || data.appVersion || '';
+                this.Date = data.date || data.Date || data.versionDate || data.appUpdateTime || '';
+                this.Size = data.size || data.Size || 0;
+            }
+        }
+
+        class Universal {
+            constructor(data) {
+                this.Name = data.name || data.Name || data.repoName || '';
+                this.Identifier = data.identifier || data.Identifier || '';
+                this.IconURL = data.iconURL || data.IconURL || data.repoIcon || '';
+                this.Caption = data.caption || data.Caption || data.subtitle || '';
+                this.Description = data.description || data.Description || '';
+                this.Apps = (data.apps || data.Apps || data.Tweaked || data.appRepositories || []).map(app => new UniversalApp(app));
+                this.Permissions = data.permissions || data.Permissions || {};
+            }
+        }
+
+        // Converter functions
+        function convertToUniversal(data) {
+            if (data instanceof Universal) return data;
+
+            let universal = new Universal({});
+
+            if (data.name || data.Name) {
+                // Universal format
+                universal = new Universal(data);
+            } else if (data.META) {
+                // Scarlet format
+                universal.Name = data.META.repoName;
+                universal.IconURL = data.META.repoIcon;
+                universal.Apps = data.Tweaked.map(app => new UniversalApp({
+                    Name: app.name,
+                    DeveloperName: app.developerName,
+                    Version: app.version,
+                    IconURL: app.icon,
+                    DownloadURL: app.down,
+                    Description: app.description,
+                    BundleID: app.bundleID
+                }));
+            } else if (data.apps && data.identifier && !data.subtitle) {
+                // ESign format
+                universal.Name = data.name;
+                universal.Identifier = data.identifier;
+                universal.Apps = data.apps.map(app => new UniversalApp({
+                    Name: app.name,
+                    BundleID: app.bundleIdentifier,
+                    Description: app.localizedDescription,
+                    DownloadURL: app.downloadURL,
+                    IconURL: app.iconURL,
+                    Version: app.version,
+                    Date: app.versionDate,
+                    Size: app.size
+                }));
+            } else if (data.appRepositories) {
+                // GBox format
+                universal.Name = data.sourceName;
+                universal.IconURL = data.sourceImage;
+                universal.Description = data.sourceDescription;
+                universal.Apps = data.appRepositories.map(app => new UniversalApp({
+                    Name: app.appName,
+                    Version: app.appVersion,
+                    Description: app.appDescription,
+                    IconURL: app.appImage,
+                    DownloadURL: app.appPackage,
+                    Date: app.versionDate
+                }));
+            } else if (data.apps && data.identifier && !data.iconURL) {
+                // Feather format
+                universal.Name = data.name;
+                universal.Identifier = data.identifier;
+                universal.Apps = data.apps.map(app => new UniversalApp({
+                    Name: app.name,
+                    BundleID: app.bundleIdentifier,
+                    Caption: app.subtitle,
+                    Description: app.localizedDescription,
+                    DownloadURL: app.downloadURL,
+                    IconURL: app.iconURL,
+                    Version: app.version,
+                    Size: app.size
+                }));
+            } else if (data.apps && data.identifier && data.subtitle) {
+                // AltStore format
+                const bundleIdIdxs = {};
+                data.apps.forEach((app, idx) => {
+                    bundleIdIdxs[app.bundleIdentifier] = bundleIdIdxs[app.bundleIdentifier] || [];
+                    bundleIdIdxs[app.bundleIdentifier].push(idx);
+                });
+
+                for (let bundle in bundleIdIdxs) {
+                    const idxs = bundleIdIdxs[bundle];
+                    const orig = data.apps[idxs[0]];
+                    let app = new UniversalApp({
+                        Name: orig.name,
+                        DeveloperName: orig.developerName,
+                        BundleID: bundle,
+                        IconURL: orig.iconURL
+                    });
+
+                    idxs.forEach(idx => {
+                        const origIdx = data.apps[idx];
+                        app.Versions = app.Versions || [];
+                        app.Versions.push({
+                            Version: origIdx.version,
+                            Date: origIdx.date,
+                            Size: origIdx.size,
+                            DownloadURL: origIdx.downloadURL,
+                            Description: origIdx.localizedDescription
+                        });
+                    });
+
+                    if (data.permissions && data.permissions[bundle]) {
+                        app.Permissions = data.permissions[bundle];
+                    }
+
+                    universal.Apps.push(app);
+                }
+                universal.Name = data.name;
+                universal.Identifier = data.identifier;
+                universal.IconURL = data.iconURL;
+                universal.Caption = data.subtitle;
+                universal.Description = data.description;
+            }
+
+            return universal;
+        }
+
+        // Populate the app grid with apps
+        function populateAppGrid(apps) {
+            const appGrid = document.getElementById('app-grid');
+            appGrid.innerHTML = '';
+
+            const fragment = document.createDocumentFragment();
+            const useAnimation = apps.length <= 25;
+
+            apps.forEach((app, index) => {
+                const appCard = document.createElement('div');
+                appCard.classList.add('app-card');
+                appCard.dataset.name = app.Name.toLowerCase();
+                appCard.innerHTML = `
+                    ${app.IconURL ? `<img src="${app.IconURL}" alt="${app.Name} icon" loading="lazy">` : ''}
+                    <h3>${app.Name}</h3>
+                    <p>${app.Caption || ''}</p>
+                    <p class="bundle-id">Bundle ID: ${app.BundleID}</p>
+                    <p class="version">Version: ${app.Version || (app.Versions && app.Versions[0] ? app.Versions[0].Version : '')}</p>
+                    <p>${app.Description || ''}</p>
+                    <a href="${app.DownloadURL || (app.Versions && app.Versions[0] ? app.Versions[0].DownloadURL : '')}" target="_blank" class="download-btn">Download</a>
+                `;
+                fragment.appendChild(appCard);
+
+                if (useAnimation) {
+                    setTimeout(() => {
+                        appCard.classList.add('animate');
+                        appCard.style.animationDelay = `${index * 0.05}s`;
+                    }, 0);
+                } else {
+                    appCard.classList.add('visible');
+                }
+            });
+
+            appGrid.appendChild(fragment);
+            document.getElementById('loading-bar').style.display = 'none';
+            document.getElementById('apps-section').style.display = 'block';
+        }
+
+        // Search apps functionality with debouncing
+        let searchTimeout;
+        function searchApps() {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                const searchInput = document.getElementById('search-input').value.toLowerCase();
+                const appCards = document.getElementsByClassName('app-card');
+                Array.from(appCards).forEach(card => {
+                    const appName = card.dataset.name;
+                    card.style.display = appName.includes(searchInput) ? '' : 'none';
+                });
+            }, 100);
+        }
+
+        // Load repo from input with loading bar and italicized message
+        async function loadRepo() {
+            const input = document.querySelector('.repo-input textarea').value.trim();
+            let repoData;
+            const loadingBar = document.getElementById('loading-bar');
+            loadingBar.style.display = 'block';
+
+            try {
+                if (input.startsWith('http')) {
+                    // Handle URL
+                    const proxyUrl = 'https://api.allorigins.win/raw?url=';
+                    const response = await fetch(proxyUrl + encodeURIComponent(input), {
+                        headers: {
+                            'Origin': window.location.origin
+                        }
+                    });
+                    if (!response.ok) throw new Error('Failed to fetch repo: ' + response.statusText);
+                    repoData = await response.json();
+                } else if (isBase64(input)) {
+                    // Handle base64-encoded URL
+                    const decoded = decodeBase64Repo(input);
+                    if (decoded) {
+                        const proxyUrl = 'https://api.allorigins.win/raw?url=';
+                        const response = await fetch(proxyUrl + encodeURIComponent(decoded), {
+                            headers: {
+                                'Origin': window.location.origin
+                            }
+                        });
+                        if (!response.ok) throw new Error('Failed to fetch repo: ' + response.statusText);
+                        repoData = await response.json();
+                    }
+                } else {
+                    // Handle raw JSON
+                    repoData = JSON.parse(input);
+                }
+
+                // Convert to Universal format
+                const universalRepo = convertToUniversal(repoData);
+                populateAppGrid(universalRepo.Apps);
+
+                // Add italicized message under the Load Repo button
+                const repoInputDiv = document.querySelector('.repo-input');
+                let reloadMessage = document.getElementById('reload-message');
+                if (!reloadMessage) {
+                    reloadMessage = document.createElement('p');
+                    reloadMessage.id = 'reload-message';
+                    reloadMessage.style.fontStyle = 'italic';
+                    reloadMessage.style.color = '#aaa';
+                    reloadMessage.style.marginTop = '0.5rem';
+                    reloadMessage.textContent = 'Reload the page to load another repo for faster processing';
+                    repoInputDiv.appendChild(reloadMessage);
+                }
+
+            } catch (error) {
+                alert('Error loading repo: ' + error.message);
+                loadingBar.style.display = 'none';
+            }
+        }
+
+        // Improved base64 detection
+        function isBase64(str) {
+            if (str.length <= 100 || str.startsWith('{')) return false;
+            // Check if the string contains only valid base64 characters
+            return /^[A-Za-z0-9+/=]+$/.test(str.replace(/\s/g, ''));
+        }
+
+        // Decode base64 encoded repo URLs
+        function decodeBase64Repo(encoded) {
+            try {
+                encoded = encoded.trim().replace(/\s+/g, '');
+                const padding = encoded.length % 4;
+                if (padding) {
+                    encoded += '='.repeat(4 - padding);
+                }
+                const decoded = atob(encoded);
+                if (decoded.startsWith('http://') || decoded.startsWith('https://')) {
+                    return decoded;
+                }
+                throw new Error('Decoded string is not a valid URL');
+            } catch (error) {
+                console.error('Failed to decode base64:', error);
+                throw new Error('Invalid base64 encoded repo URL');
+            }
+        }
+
+        // Copy selected common repo URL
+        function copyRepo() {
+            const select = document.getElementById('common-repos');
+            const url = select.value;
+            if (url) {
+                navigator.clipboard.writeText(url).then(() => {
+                    alert('Repo URL copied to clipboard!');
+                }).catch(err => {
+                    alert('Failed to copy: ' + err);
+                });
+            } else {
+                alert('Please select a repo to copy');
+            }
+        }
+
+        // Initial setup
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('apps-section').style.display = 'none';
+            document.getElementById('loading-bar').style.display = 'none';
+        });
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'91f7587c59d3bd52',t:'MTc0MTgyNTAxOC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>

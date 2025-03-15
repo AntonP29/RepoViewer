@@ -29,6 +29,7 @@
             font-family: 'Proxima Nova', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
             background: url('https://raw.githubusercontent.com/AntonP29/RepoViewer/refs/heads/main/background/RepoViewerBackground.jpg') no-repeat center center fixed;
             background-size: cover;
+            background-attachment: fixed;
             color: var(--text-light);
             line-height: 1.6;
             margin: 0;
@@ -276,6 +277,7 @@
             opacity: 0;
             transform: translateY(20px);
             animation: floatIn 0.5s ease-out forwards;
+            display: none;
         }
 
         .apps-section h2 {
@@ -614,8 +616,9 @@
                 addLoadMoreButton(appGrid);
             }
 
+            const appsSection = document.getElementById('apps-section');
+            appsSection.style.display = 'block';
             document.getElementById('loading-bar').style.display = 'none';
-            document.getElementById('apps-section').style.display = 'block';
         }
 
         function renderApps(appsToRender) {
@@ -701,6 +704,46 @@
             }, 100);
         }
 
+        function isValidRepo(data) {
+            if (!data || typeof data !== 'object') return false;
+            return (data.apps && Array.isArray(data.apps)) || 
+                   (data.Tweaked && Array.isArray(data.Tweaked)) || 
+                   (data.appRepositories && Array.isArray(data.appRepositories));
+        }
+
+        function isBase64OrBytecode(str) {
+            if (str.length <= 100 || str.startsWith('{')) return false;
+            return /^[A-Za-z0-9+/=]+$/.test(str.replace(/\s/g, '')) || 
+                   /^[\x00-\xFF]+$/.test(str);
+        }
+
+        function decodeBase64OrBytecode(encoded) {
+            try {
+                encoded = encoded.trim().replace(/\s+/g, '');
+                if (/^[A-Za-z0-9+/=]+$/.test(encoded)) {
+                    const padding = encoded.length % 4;
+                    if (padding) encoded += '='.repeat(4 - padding);
+                    const decoded = atob(encoded);
+                    if (decoded.startsWith('http://') || decoded.startsWith('https://')) {
+                        return decoded;
+                    }
+                }
+                if (/^[\x00-\xFF]+$/.test(encoded)) {
+                    let decoded = '';
+                    for (let i = 0; i < encoded.length; i += 2) {
+                        decoded += String.fromCharCode(parseInt(encoded.substr(i, 2), 16));
+                    }
+                    if (decoded.startsWith('http://') || decoded.startsWith('https://')) {
+                        return decoded;
+                    }
+                }
+                throw new Error('Decoded string is not a valid URL');
+            } catch (error) {
+                console.error('Decoding failed:', error);
+                throw new Error('Invalid encoded repo URL');
+            }
+        }
+
         async function loadRepo() {
             const input = document.querySelector('.repo-input textarea').value.trim();
             let repoData;
@@ -711,26 +754,30 @@
                 if (input.startsWith('http')) {
                     const proxyUrl = 'https://repo-proxy.antonp29.workers.dev/?url=';
                     const response = await fetch(proxyUrl + encodeURIComponent(input), {
-                        headers: {
-                            'Origin': window.location.origin
-                        }
+                        headers: { 'Origin': window.location.origin }
                     });
                     if (!response.ok) throw new Error('Failed to fetch repo: ' + response.statusText);
                     repoData = await response.json();
-                } else if (isBase64(input)) {
-                    const decoded = decodeBase64Repo(input);
+                } else if (isBase64OrBytecode(input)) {
+                    const decoded = decodeBase64OrBytecode(input);
                     if (decoded) {
                         const proxyUrl = 'https://repo-proxy.antonp29.workers.dev/?url=';
                         const response = await fetch(proxyUrl + encodeURIComponent(decoded), {
-                            headers: {
-                                'Origin': window.location.origin
-                            }
+                            headers: { 'Origin': window.location.origin }
                         });
                         if (!response.ok) throw new Error('Failed to fetch repo: ' + response.statusText);
                         repoData = await response.json();
                     }
                 } else {
-                    repoData = JSON.parse(input);
+                    try {
+                        repoData = JSON.parse(input);
+                    } catch (e) {
+                        throw new Error('Invalid JSON format: ' + e.message);
+                    }
+                }
+
+                if (!isValidRepo(repoData)) {
+                    throw new Error('Repo data is not properly structured');
                 }
 
                 const universalRepo = convertToUniversal(repoData);
@@ -751,29 +798,7 @@
             } catch (error) {
                 alert('Error loading repo: ' + error.message);
                 loadingBar.style.display = 'none';
-            }
-        }
-
-        function isBase64(str) {
-            if (str.length <= 100 || str.startsWith('{')) return false;
-            return /^[A-Za-z0-9+/=]+$/.test(str.replace(/\s/g, ''));
-        }
-
-        function decodeBase64Repo(encoded) {
-            try {
-                encoded = encoded.trim().replace(/\s+/g, '');
-                const padding = encoded.length % 4;
-                if (padding) {
-                    encoded += '='.repeat(4 - padding);
-                }
-                const decoded = atob(encoded);
-                if (decoded.startsWith('http://') || decoded.startsWith('https://')) {
-                    return decoded;
-                }
-                throw new Error('Decoded string is not a valid URL');
-            } catch (error) {
-                console.error('Failed to decode base64:', error);
-                throw new Error('Invalid base64 encoded repo URL');
+                document.getElementById('apps-section').style.display = 'none';
             }
         }
 
